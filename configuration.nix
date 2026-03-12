@@ -11,8 +11,8 @@
     ./system/boot.nix
     ./system/hardware.nix
     ./system/fonts.nix
-    ./internet/accelerator/accelerator.nix
-    ./internet/kantets-wg-home.nix
+    ./system/internet/accelerator/accelerator.nix
+    ./system/internet/kantets-wg-home.nix
   ];
   nixpkgs.config.allowUnfree = true;
 
