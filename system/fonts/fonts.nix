@@ -1,23 +1,29 @@
 { pkgs, ... }:
 
+let
+  apple-emoji = pkgs.callPackage ./apple-emoji-font.nix { };
+in
 {
   fonts = {
     enableDefaultPackages = true;
 
     packages = with pkgs; [
-      noto-fonts
+      inter
 
+      noto-fonts
       noto-fonts-color-emoji
 
       nerd-fonts.jetbrains-mono
+
+      apple-emoji
     ];
 
     fontconfig = {
       defaultFonts = {
         serif = [ "Noto Serif" ];
-        sansSerif = [ "Noto Sans" ];
+        sansSerif = [ "Inter" "Noto Sans" ];
         monospace = [ "JetBrainsMono Nerd Font" ];
-        emoji = [ "Noto Color Emoji" ];
+        emoji = [ "Apple Color Emoji" "Noto Color Emoji" ];
       };
 
       subpixel.rgba = "rgb";

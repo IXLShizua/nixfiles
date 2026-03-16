@@ -5,12 +5,13 @@
   ...
 }:
 
+
 {
   imports = [
     ./system/hardware-configuration.nix
     ./system/boot.nix
     ./system/hardware.nix
-    ./system/fonts.nix
+    ./system/fonts/fonts.nix
     ./system/internet/accelerator/accelerator.nix
     ./system/internet/kantets-wg-home.nix
   ];
