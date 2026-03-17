@@ -5,12 +5,15 @@ let
 in
 {
   fonts = {
-    enableDefaultPackages = true;
-
+    enableDefaultPackages = false;
+    
     packages = with pkgs; [
       inter
+      roboto
 
       noto-fonts
+      noto-fonts-cjk-sans
+      noto-fonts-cjk-serif
       noto-fonts-color-emoji
 
       nerd-fonts.jetbrains-mono
@@ -20,12 +23,35 @@ in
 
     fontconfig = {
       defaultFonts = {
-        serif = [ "Noto Serif" ];
-        sansSerif = [ "Inter" "Noto Sans" ];
-        monospace = [ "JetBrainsMono Nerd Font" ];
-        emoji = [ "Apple Color Emoji" "Noto Color Emoji" ];
+        serif = [
+          "Noto Serif"
+          "Noto Serif CJK SC"
+        ];
+        sansSerif = [
+          "Inter"
+          "Roboto"
+          "Noto Sans"
+          "Noto Sans CJK SC"
+        ];
+        monospace = [
+          "JetBrainsMono Nerd Font"
+          "Noto Sans Mono CJK SC"
+        ];
+        emoji = [
+          "Apple Color Emoji"
+          "Noto Color Emoji"
+        ];
       };
 
+      antialias = true;
+      allowType1 = false;
+      allowBitmaps = false;
+      useEmbeddedBitmaps = false;
+      hinting = {
+        enable = true;
+        style = "slight";
+      };
+      subpixel.lcdfilter = "default";
       subpixel.rgba = "rgb";
 
       localConf = ''
