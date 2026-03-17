@@ -109,11 +109,14 @@
 
       fd
       fzf
-
+      bat
+      
       nixd
       nixfmt
 
       agenixDefault
+
+      fishPlugins.fzf-fish
     ];
 
     etc."micro/settings.json".text = builtins.toJSON {
