@@ -8,7 +8,6 @@ in
     enableDefaultPackages = false;
     
     packages = with pkgs; [
-      inter
       roboto
 
       noto-fonts
@@ -28,7 +27,6 @@ in
           "Noto Serif CJK SC"
         ];
         sansSerif = [
-          "Inter"
           "Roboto"
           "Noto Sans"
           "Noto Sans CJK SC"
