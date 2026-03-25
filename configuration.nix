@@ -5,7 +5,6 @@
   ...
 }:
 
-
 {
   imports = [
     ./system/hardware-configuration.nix
@@ -14,6 +13,7 @@
     ./system/fonts/fonts.nix
     ./system/internet/accelerator/accelerator.nix
     ./system/internet/kantets-wg-home.nix
+    ./system/internet/ivan-pc-nixos.nix
   ];
   nixpkgs.config.allowUnfree = true;
 
@@ -62,6 +62,8 @@
   virtualisation.libvirtd.enable = true;
   virtualisation.libvirtd.qemu.swtpm.enable = true;
 
+  virtualisation.docker.enable = true;
+
   users.users = {
     ixliynez = {
       isNormalUser = true;
@@ -69,6 +71,7 @@
       extraGroups = [
         "wheel"
         "libvirtd"
+        "docker"
       ];
       shell = pkgs.fish;
     };
@@ -110,7 +113,7 @@
       fd
       fzf
       bat
-      
+
       nixd
       nixfmt
 
