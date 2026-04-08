@@ -1,7 +1,6 @@
 {
   pkgs,
-  agenixDefault,
-  customSecretsPath,
+  custom,
   ...
 }:
 
@@ -38,7 +37,7 @@
     gvfs.enable = true;
     internet-accelerator = {
       enable = true;
-      secretFile = customSecretsPath + /internet-accelerator.json.age;
+      secretFile = custom.fromSecretsDir /internet-accelerator.json.age;
       excludeFwMarkMasked = [
         {
           mark = "0x80000";
@@ -114,24 +113,25 @@
       QT_WAYLAND_DISABLE_WINDOWDECORATION = "1";
     };
 
-    systemPackages = with pkgs; [
-      micro
-      btop
-      fastfetch
+    systemPackages =
+      with pkgs;
+      [
+        micro
+        btop
+        fastfetch
 
-      fd
-      fzf
-      bat
+        fd
+        fzf
+        bat
 
-      nixd
-      nixfmt
+        nixd
+        nixfmt
 
-      agenixDefault
+        fishPlugins.fzf-fish
 
-      fishPlugins.fzf-fish
-
-      distrobox
-    ];
+        distrobox
+      ]
+      ++ [ custom.agenixPackage ];
 
     etc."micro/settings.json".text = builtins.toJSON {
       mkparents = true;

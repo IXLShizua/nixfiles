@@ -1,7 +1,7 @@
 {
   lib,
   pkgs,
-  pkgs-easyeffects,
+  custom,
   ...
 }:
 
@@ -120,7 +120,7 @@
     awww.enable = true;
     easyeffects = {
       enable = true;
-      package = pkgs-easyeffects.easyeffects;
+      package = custom.pkgsEasyEffects.easyeffects;
     };
     mediamtx = {
       enable = true;

@@ -28,16 +28,21 @@
     }:
     let
       system = "x86_64-linux";
-      pkgs-easyeffects = import nixpkgs-easyeffects { inherit system; };
-      agenixDefault = agenix.packages."${system}".default;
+      root = ./.;
+      secretsDir = root + "/secrets";
+
+      custom = {
+        pkgsEasyEffects = import nixpkgs-easyeffects { inherit system; };
+        agenixPackage = agenix.packages."${system}".default;
+        fromRoot = path: root + path;
+        fromSecretsDir = path: secretsDir + path;
+      };
     in
     {
       nixosConfigurations = {
         ixliynez-pc = nixpkgs.lib.nixosSystem {
           specialArgs = {
-            inherit agenixDefault;
-
-            customSecretsPath = ./secrets;
+            inherit custom;
           };
 
           modules = [
@@ -52,7 +57,7 @@
               home-manager = {
                 useGlobalPkgs = true;
                 extraSpecialArgs = {
-                  inherit pkgs-easyeffects;
+                  inherit custom;
                 };
                 backupFileExtension = ".hm-backup";
                 users.ixliynez = import ./home/ixliynez.nix;
