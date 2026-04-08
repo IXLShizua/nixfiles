@@ -11,7 +11,6 @@ let
   };
 in
 {
-  "ivan-pc-nixos.conf.age" = secretDefaultConfig;
   "kantets-wg-home.conf.age" = secretDefaultConfig;
   "internet-accelerator.json.age" = secretDefaultConfig;
 }

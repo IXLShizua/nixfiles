@@ -11,9 +11,8 @@
     ./system/boot.nix
     ./system/hardware.nix
     ./system/fonts/fonts.nix
-    ./system/internet/accelerator/accelerator.nix
     ./system/internet/kantets-wg-home.nix
-    ./system/internet/ivan-pc-nixos.nix
+    ./modules/internet/accelerator.nix
   ];
   nixpkgs.config.allowUnfree = true;
 
@@ -40,9 +39,15 @@
     internet-accelerator = {
       enable = true;
       secretFile = customSecretsPath + /internet-accelerator.json.age;
-      excludeFwMarks = [
-        "0x40000"
-        "0x80000"
+      excludeFwMarkMasked = [
+        {
+          mark = "0x80000";
+          mask = "0xff0000";
+        }
+        {
+          mark = "0x400";
+          mask = "0xff00";
+        }
       ];
     };
   };
