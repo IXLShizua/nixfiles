@@ -136,7 +136,7 @@
         };
 
         webrtc = true;
-        webrtcAdditionalHosts = [ "100.64.0.10" ];
+        webrtcAdditionalHosts = [ "100.64.0.1" ];
       };
     };
   };

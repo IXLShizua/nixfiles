@@ -6,9 +6,10 @@ in
 {
   fonts = {
     enableDefaultPackages = false;
-    
+
     packages = with pkgs; [
       roboto
+      inter
 
       noto-fonts
       noto-fonts-cjk-sans
@@ -23,18 +24,31 @@ in
     fontconfig = {
       defaultFonts = {
         serif = [
-          "Noto Serif"
+          "Inter"
+          "Noto Sans"
           "Noto Serif CJK SC"
+          "Noto Serif CJK TC"
+          "Noto Serif CJK JP"
+          "Noto Serif CJK KR"
         ];
+
         sansSerif = [
           "Roboto"
           "Noto Sans"
           "Noto Sans CJK SC"
+          "Noto Sans CJK TC"
+          "Noto Sans CJK JP"
+          "Noto Sans CJK KR"
         ];
+
         monospace = [
           "JetBrainsMono Nerd Font"
           "Noto Sans Mono CJK SC"
+          "Noto Sans Mono CJK TC"
+          "Noto Sans Mono CJK JP"
+          "Noto Sans Mono CJK KR"
         ];
+
         emoji = [
           "Apple Color Emoji"
           "Noto Color Emoji"
@@ -45,12 +59,16 @@ in
       allowType1 = false;
       allowBitmaps = false;
       useEmbeddedBitmaps = false;
+
       hinting = {
         enable = true;
         style = "slight";
       };
-      subpixel.lcdfilter = "default";
-      subpixel.rgba = "rgb";
+
+      subpixel = {
+        lcdfilter = "default";
+        rgba = "rgb";
+      };
 
       localConf = ''
         <match target="pattern">

@@ -38,6 +38,10 @@ in
 
         ${pkgs.iproute2}/bin/ip -6 rule add fwmark 1 table 100 || true
         ${pkgs.iproute2}/bin/ip -6 route add local default dev lo table 100 || true
+
+        ${pkgs.iproute2}/bin/ip link add sbdummy0 type dummy || true
+        ${pkgs.iproute2}/bin/ip link set sbdummy0 up || true
+        ${pkgs.iproute2}/bin/ip -6 route replace default dev sbdummy0 metric 4294967294 || true
       '';
 
       postStop = ''
@@ -46,6 +50,9 @@ in
 
         ${pkgs.iproute2}/bin/ip -6 rule del fwmark 1 table 100 || true
         ${pkgs.iproute2}/bin/ip -6 route del local default dev lo table 100 || true
+
+        ${pkgs.iproute2}/bin/ip -6 route del default dev sbdummy0 || true
+        ${pkgs.iproute2}/bin/ip link del sbdummy0 || true
       '';
 
       serviceConfig.ExecStart = lib.mkForce [
