@@ -32,7 +32,7 @@
       secretsDir = root + "/secrets";
 
       custom = {
-        pkgsEasyEffects = import nixpkgs-easyeffects { inherit system; };
+        easyEffectsPackage = (import nixpkgs-easyeffects { inherit system; }).easyeffects;
         agenixPackage = agenix.packages."${system}".default;
         fromRoot = path: root + path;
         fromSecretsDir = path: secretsDir + path;

@@ -120,7 +120,7 @@
     awww.enable = true;
     easyeffects = {
       enable = true;
-      package = custom.pkgsEasyEffects.easyeffects;
+      package = custom.easyEffectsPackage;
     };
     mediamtx = {
       enable = true;
