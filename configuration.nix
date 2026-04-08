@@ -120,6 +120,8 @@
       agenixDefault
 
       fishPlugins.fzf-fish
+
+      distrobox
     ];
 
     etc."micro/settings.json".text = builtins.toJSON {
