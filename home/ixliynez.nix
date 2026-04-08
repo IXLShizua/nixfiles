@@ -1,4 +1,5 @@
 {
+  lib,
   pkgs,
   pkgs-easyeffects,
   ...
@@ -43,6 +44,10 @@
       package = pkgs.bibata-cursors;
       size = 20;
     };
+
+    activation.vicinae-refresh-apps = lib.mkForce ''
+      ${pkgs.vicinae}/bin/vicinae deeplink vicinae://launch/core/refresh-apps || true
+    '';
 
     stateVersion = "25.11";
   };
@@ -112,7 +117,7 @@
 
   services = {
     polkit-gnome.enable = true;
-    swww.enable = true;
+    awww.enable = true;
     easyeffects = {
       enable = true;
       package = pkgs-easyeffects.easyeffects;

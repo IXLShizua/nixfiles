@@ -40,6 +40,10 @@
     internet-accelerator = {
       enable = true;
       secretFile = customSecretsPath + /internet-accelerator.json.age;
+      excludeFwMarks = [
+        "0x40000"
+        "0x80000"
+      ];
     };
   };
 

@@ -7,6 +7,28 @@
 
 let
   cfg = config.services.internet-accelerator;
+
+  markType = lib.types.strMatching "^(0x[0-9a-fA-F]+|[0-9]+)$";
+
+  nftBypassRules = lib.concatStringsSep "\n" (
+    map (mark: ''
+      meta mark ${mark} ct mark set ${cfg.autoRedirectBypassMark} counter return
+    '') cfg.excludeFwMarks
+  );
+
+  fwmarkBypassRuleset = pkgs.writeText "internet-accelerator-fwmark-bypass.nft" ''
+    table inet internet_accelerator_bypass {
+      chain output {
+        type filter hook output priority mangle - 2; policy accept;
+        ${nftBypassRules}
+      }
+
+      chain prerouting {
+        type filter hook prerouting priority dstnat - 2; policy accept;
+        ${nftBypassRules}
+      }
+    }
+  '';
 in
 {
   options.services.internet-accelerator = {
@@ -16,49 +38,59 @@ in
       type = lib.types.path;
       example = lib.literalExpression "./secrets/internet-accelerator.json.age";
     };
+
+    excludeFwMarks = lib.mkOption {
+      type = lib.types.listOf markType;
+      default = [ ];
+      example = [
+        "0x66"
+        "0x100"
+        "1234"
+      ];
+      description = ''
+        fwmark values that must bypass sing-box auto_redirect/TUN proxying.
+        For matched packets, this module sets conntrack mark to sing-box
+        auto_redirect_output_mark before sing-box nft hooks run.
+      '';
+    };
+
+    autoRedirectBypassMark = lib.mkOption {
+      type = markType;
+      default = "0x2024";
+      example = "0x2024";
+      description = ''
+        Must match sing-box auto_redirect_output_mark from the JSON config.
+        Leave default if you did not override it in sing-box.
+      '';
+    };
   };
 
-  config = lib.mkIf cfg.enable {
+  config = lib.mkIf cfg.enable ({
     age.secrets."internet-accelerator.json" = {
       file = cfg.secretFile;
       owner = "sing-box";
     };
 
     services.sing-box.enable = true;
-
-    networking.nftables = {
-      enable = true;
-      rulesetFile = ./accelerator.conf;
-    };
+    networking.nftables.enable = true;
 
     systemd.services.sing-box = {
-      preStart = ''
-        ${pkgs.iproute2}/bin/ip rule add fwmark 1 table 100 || true
-        ${pkgs.iproute2}/bin/ip route add local default dev lo table 100 || true
-
-        ${pkgs.iproute2}/bin/ip -6 rule add fwmark 1 table 100 || true
-        ${pkgs.iproute2}/bin/ip -6 route add local default dev lo table 100 || true
-
-        ${pkgs.iproute2}/bin/ip link add sbdummy0 type dummy || true
-        ${pkgs.iproute2}/bin/ip link set sbdummy0 up || true
-        ${pkgs.iproute2}/bin/ip -6 route replace default dev sbdummy0 metric 4294967294 || true
-      '';
-
-      postStop = ''
-        ${pkgs.iproute2}/bin/ip rule del fwmark 1 table 100 || true
-        ${pkgs.iproute2}/bin/ip route del local default dev lo table 100 || true
-
-        ${pkgs.iproute2}/bin/ip -6 rule del fwmark 1 table 100 || true
-        ${pkgs.iproute2}/bin/ip -6 route del local default dev lo table 100 || true
-
-        ${pkgs.iproute2}/bin/ip -6 route del default dev sbdummy0 || true
-        ${pkgs.iproute2}/bin/ip link del sbdummy0 || true
-      '';
-
       serviceConfig.ExecStart = lib.mkForce [
         ""
         "${pkgs.sing-box}/bin/sing-box run -c ${config.age.secrets."internet-accelerator.json".path}"
       ];
+    }
+    // lib.optionalAttrs (cfg.excludeFwMarks != [ ]) {
+      postStart = lib.mkAfter ''
+        set -eu
+
+        ${pkgs.nftables}/bin/nft delete table inet internet_accelerator_bypass 2>/dev/null || true
+        ${pkgs.nftables}/bin/nft -f ${fwmarkBypassRuleset}
+      '';
+
+      postStop = lib.mkAfter ''
+        ${pkgs.nftables}/bin/nft delete table inet internet_accelerator_bypass 2>/dev/null || true
+      '';
     };
-  };
+  });
 }
