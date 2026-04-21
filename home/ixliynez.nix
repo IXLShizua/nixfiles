@@ -66,6 +66,7 @@
             mkhl.direnv
             jnoortheen.nix-ide
             bmalehorn.vscode-fish
+            coolbear.systemd-unit-file
           ];
 
           userSettings = {
@@ -86,7 +87,12 @@
         };
       };
     };
-    git.enable = true;
+    git = {
+      enable = true;
+      settings = {
+        safe.directory = [ "/etc/nixos" ];
+      };
+    };
     direnv = {
       enable = true;
       enableFishIntegration = true;
@@ -162,10 +168,18 @@
 
     mimeApps = {
       enable = true;
-      defaultApplications = {
-        "text/plain" = [ "code.desktop" ];
-        "application/json" = [ "code.desktop" ];
-      };
+      defaultApplications =
+        let
+          vscode = [ "code.desktop" ];
+        in
+        {
+          "text/plain" = vscode;
+          "application/json" = vscode;
+
+          "text/x-shellscript" = vscode;
+          "application/x-shellscript" = vscode;
+          "application/x-sh" = vscode;
+        };
     };
   };
 
