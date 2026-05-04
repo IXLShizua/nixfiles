@@ -35,6 +35,7 @@
       termius
       jetbrains.idea
       jetbrains.rider
+      android-studio
     ];
 
     pointerCursor = {

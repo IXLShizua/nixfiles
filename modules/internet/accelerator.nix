@@ -26,15 +26,13 @@ let
     };
   };
 
-  exactFwMarkRules =
-    map (mark: ''
-      meta mark ${mark} ct mark set ${cfg.autoRedirectBypassMark} counter return
-    '') cfg.excludeFwMarks;
+  exactFwMarkRules = map (mark: ''
+    meta mark ${mark} ct mark set ${cfg.autoRedirectBypassMark} counter return
+  '') cfg.excludeFwMarks;
 
-  maskedFwMarkRules =
-    map (rule: ''
-      meta mark & ${rule.mask} == ${rule.mark} ct mark set ${cfg.autoRedirectBypassMark} counter return
-    '') cfg.excludeFwMarkMasked;
+  maskedFwMarkRules = map (rule: ''
+    meta mark & ${rule.mask} == ${rule.mark} ct mark set ${cfg.autoRedirectBypassMark} counter return
+  '') cfg.excludeFwMarkMasked;
 
   allFwMarkRules = exactFwMarkRules ++ maskedFwMarkRules;
 
@@ -66,7 +64,10 @@ in
     excludeFwMarks = lib.mkOption {
       type = lib.types.listOf markType;
       default = [ ];
-      example = [ "0x66" "0x100" ];
+      example = [
+        "0x66"
+        "0x100"
+      ];
       description = ''
         Exact fwmark values that must bypass sing-box auto_redirect/TUN proxying.
       '';
@@ -76,8 +77,14 @@ in
       type = lib.types.listOf fwMarkRuleType;
       default = [ ];
       example = [
-        { mark = "0x80000"; mask = "0xff0000"; }
-        { mark = "0x400"; mask = "0xff00"; }
+        {
+          mark = "0x80000";
+          mask = "0xff0000";
+        }
+        {
+          mark = "0x400";
+          mask = "0xff00";
+        }
       ];
       description = ''
         fwmark match rules with mask. For matched packets, this module sets
@@ -103,14 +110,21 @@ in
     };
 
     services.sing-box.enable = true;
-    networking.nftables.enable = true;
+    networking = {
+      nftables.enable = true;
+      networkmanager.dns = "none";
+      nameservers = [
+        "127.0.0.1"
+      ];
+    };
 
     systemd.services.sing-box = {
       serviceConfig.ExecStart = lib.mkForce [
         ""
         "${pkgs.sing-box}/bin/sing-box run -c ${config.age.secrets."internet-accelerator.json".path}"
       ];
-    } // lib.optionalAttrs (allFwMarkRules != [ ]) {
+    }
+    // lib.optionalAttrs (allFwMarkRules != [ ]) {
       postStart = lib.mkAfter ''
         set -eu
         ${pkgs.nftables}/bin/nft delete table inet internet_accelerator_bypass 2>/dev/null || true
