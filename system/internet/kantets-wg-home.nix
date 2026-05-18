@@ -1,7 +1,7 @@
 { config, custom, ... }:
 
 {
-  age.secrets."kantets-wg-home.conf".file = custom.fromSecretsDir /kantets-wg-home.conf.age;
+  age.secrets."kantets-wg-home.conf".file = custom.lib.fromSecretsDir /kantets-wg-home.conf.age;
 
   networking.wg-quick.interfaces.kantets-wg-home = {
     autostart = false;

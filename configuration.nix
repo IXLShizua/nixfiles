@@ -37,7 +37,7 @@
     gvfs.enable = true;
     internet-accelerator = {
       enable = true;
-      secretFile = custom.fromSecretsDir /internet-accelerator.json.age;
+      secretFile = custom.lib.fromSecretsDir /internet-accelerator.json.age;
       excludeFwMarkMasked = [
         {
           mark = "0x80000";
@@ -131,7 +131,7 @@
 
         distrobox
       ]
-      ++ [ custom.agenixPackage ];
+      ++ [ custom.packages.agenix ];
 
     etc."micro/settings.json".text = builtins.toJSON {
       mkparents = true;

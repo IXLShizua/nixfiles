@@ -1,4 +1,5 @@
 {
+  config,
   lib,
   pkgs,
   custom,
@@ -23,6 +24,7 @@
       telegram-desktop
       mumble
       loupe
+      papers
       qbittorrent
       (prismlauncher.override {
         jdks = [
@@ -36,6 +38,7 @@
       jetbrains.idea
       jetbrains.rider
       android-studio
+      antigravity-fhs
     ];
 
     pointerCursor = {
@@ -54,7 +57,11 @@
   };
 
   programs = {
-    firefox.enable = true;
+    firefox = {
+      enable = true;
+      # Remove explicit configPath after update home.stateVersion to >= 26.05
+      configPath = "${config.xdg.configHome}/mozilla/firefox";
+    };
     vscode = {
       enable = true;
       package = pkgs.vscode.fhs;
@@ -127,7 +134,7 @@
     awww.enable = true;
     easyeffects = {
       enable = true;
-      package = custom.easyEffectsPackage;
+      package = custom.packages.easyeffects;
     };
     mediamtx = {
       enable = true;
@@ -172,14 +179,38 @@
       defaultApplications =
         let
           vscode = [ "code.desktop" ];
+          browser = [ "firefox.desktop" ];
+          fileManager = [ "org.gnome.Nautilus.desktop" ];
+          imageViewer = [ "org.gnome.Loupe.desktop" ];
+          pdfViewer = [ "org.gnome.Papers.desktop" ];
         in
         {
           "text/plain" = vscode;
           "application/json" = vscode;
-
           "text/x-shellscript" = vscode;
           "application/x-shellscript" = vscode;
           "application/x-sh" = vscode;
+
+          "text/html" = browser;
+          "x-scheme-handler/http" = browser;
+          "x-scheme-handler/https" = browser;
+          "x-scheme-handler/about" = browser;
+          "x-scheme-handler/unknown" = browser;
+
+          "inode/directory" = fileManager;
+
+          "image/jpeg" = imageViewer;
+          "image/png" = imageViewer;
+          "image/gif" = imageViewer;
+          "image/webp" = imageViewer;
+          "image/svg+xml" = imageViewer;
+
+          "application/pdf" = pdfViewer;
+          "application/x-pdf" = pdfViewer;
+          "image/vnd.djvu" = pdfViewer;
+          "application/postscript" = pdfViewer;
+          "application/oxps" = pdfViewer;
+          "application/vnd.ms-xpsdocument" = pdfViewer;
         };
     };
   };
@@ -214,6 +245,13 @@
         name = "adw-gtk3-dark";
         package = pkgs.adw-gtk3;
       };
+      extraConfig = {
+        gtk-application-prefer-dark-theme = 1;
+      };
+    };
+
+    gtk4 = {
+      theme = null;
       extraConfig = {
         gtk-application-prefer-dark-theme = 1;
       };
