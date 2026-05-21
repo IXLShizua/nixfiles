@@ -11,7 +11,7 @@
     ./system/hardware.nix
     ./system/fonts/fonts.nix
     ./system/internet/kantets-wg-home.nix
-    ./modules/internet/accelerator.nix
+    ./system/modules/internet/accelerator.nix
   ];
   nixpkgs.config.allowUnfree = true;
 
@@ -59,7 +59,7 @@
     fish = {
       enable = true;
       interactiveShellInit = ''
-        	  	  set fish_greeting
+                set fish_greeting
                 set fish_prompt_pwd_dir_length 0
         	  	'';
     };
