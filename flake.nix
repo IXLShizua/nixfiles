@@ -14,6 +14,9 @@
 
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
+
+    nix-vscode-extensions.url = "github:nix-community/nix-vscode-extensions";
+    nix-vscode-extensions.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs =
@@ -24,6 +27,7 @@
       nix-index-database,
       agenix,
       home-manager,
+      nix-vscode-extensions,
       ...
     }:
     let
@@ -34,7 +38,8 @@
       custom = {
         packages = {
           easyeffects = (import nixpkgs-easyeffects { inherit system; }).easyeffects;
-          agenix = agenix.packages."${system}".default;
+          agenix = agenix.packages.${system}.default;
+          community-vscode-extensions = nix-vscode-extensions.extensions.${system}.vscode-marketplace;
         };
         
         lib = {

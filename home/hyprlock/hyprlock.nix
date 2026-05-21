@@ -1,3 +1,6 @@
+let
+  background = ../assets/flowers.jpg;
+in
 {
   programs.hyprlock = {
     enable = true;
@@ -15,7 +18,7 @@
       background = [
         {
           monitor = "";
-          path = "${./flowers.jpg}";
+          path = "${background}";
           blur_passes = 2;
           contrast = 1.0;
           brightness = 0.5;

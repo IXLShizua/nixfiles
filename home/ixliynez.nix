@@ -10,6 +10,7 @@
   imports = [
     ./modules/services/mediamtx.nix
     ./fish/fish.nix
+    ./wallpaper/wallpaper.nix
     ./hyprlock/hyprlock.nix
   ];
 
@@ -70,12 +71,16 @@
           enableUpdateCheck = false;
           enableExtensionUpdateCheck = false;
 
-          extensions = with pkgs.vscode-extensions; [
-            mkhl.direnv
-            jnoortheen.nix-ide
-            bmalehorn.vscode-fish
-            coolbear.systemd-unit-file
-          ];
+          extensions =
+            with pkgs.vscode-extensions;
+            with custom.packages.community-vscode-extensions;
+            [
+              mkhl.direnv
+              jnoortheen.nix-ide
+              bmalehorn.vscode-fish
+              coolbear.systemd-unit-file
+              kdl-org.kdl
+            ];
 
           userSettings = {
             "editor.fontSize" = 14;
@@ -131,7 +136,6 @@
 
   services = {
     polkit-gnome.enable = true;
-    awww.enable = true;
     easyeffects = {
       enable = true;
       package = custom.packages.easyeffects;
