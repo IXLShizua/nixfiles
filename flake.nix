@@ -70,7 +70,7 @@
                   inherit custom;
                 };
                 backupFileExtension = ".hm-backup";
-                users.ixliynez = import ./home/ixliynez.nix;
+                users.ixliynez = import ./home/ixliynez/ixliynez.nix;
               };
             }
           ];
