@@ -153,7 +153,7 @@
         srt = false;
 
         paths = {
-          "all" = {
+          all = {
             source = "publisher";
           };
         };
