@@ -9,9 +9,9 @@
 {
   imports = [
     ./modules/services/mediamtx.nix
-    ./fish/fish.nix
-    ./wallpaper/wallpaper.nix
-    ./hyprlock/hyprlock.nix
+    ./conf/fish/fish.nix
+    ./conf/wallpaper.nix
+    ./conf/hyprlock.nix
   ];
 
   home = {

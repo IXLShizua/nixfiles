@@ -104,14 +104,37 @@ in
   };
 
   config = lib.mkIf cfg.enable {
+    assertions = [
+      {
+        assertion = config.networking.nftables.enable;
+        message = ''
+          services.internet-accelerator requires networking.nftables.enable = true.
+
+          This module installs nftables rules for fwmark bypassing and expects
+          nftables to be available when the accelerator is enabled.
+        '';
+      }
+
+      {
+        assertion = config.networking.networkmanager.enable;
+        message = ''
+          services.internet-accelerator currently requires networking.networkmanager.enable = true,
+          because this module configures DNS through networking.networkmanager.dns = "none".
+        '';
+      }
+    ];
+
     age.secrets."internet-accelerator.json" = {
       file = cfg.secretFile;
       owner = "sing-box";
     };
 
     services.sing-box.enable = true;
+
     networking = {
-      nftables.enable = true;
+      nftables.enable = lib.mkDefault true;
+      networkmanager.enable = lib.mkDefault true;
+
       networkmanager.dns = "none";
       nameservers = [
         "127.0.0.1"

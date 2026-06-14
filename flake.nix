@@ -41,7 +41,7 @@
           agenix = agenix.packages.${system}.default;
           community-vscode-extensions = nix-vscode-extensions.extensions.${system}.vscode-marketplace;
         };
-        
+
         lib = {
           fromRoot = path: root + path;
           fromSecretsDir = path: secretsDir + path;
@@ -56,7 +56,6 @@
           };
 
           modules = [
-            ./system/disk-config.nix
             ./configuration.nix
             disko.nixosModules.disko
             nix-index-database.nixosModules.default

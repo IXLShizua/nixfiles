@@ -1,7 +1,7 @@
 { lib, pkgs, ... }:
 
 let
-  wallpaper = ../assets/flowers.jpg;
+  wallpaper = ./assets/flowers.jpg;
   awww = lib.getExe pkgs.awww;
 in
 {

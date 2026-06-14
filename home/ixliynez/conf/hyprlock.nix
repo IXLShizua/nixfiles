@@ -1,5 +1,5 @@
 let
-  background = ../assets/flowers.jpg;
+  background = ./assets/flowers.jpg;
 in
 {
   programs.hyprlock = {

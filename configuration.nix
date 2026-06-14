@@ -6,13 +6,21 @@
 
 {
   imports = [
-    ./system/hardware-configuration.nix
-    ./system/boot.nix
-    ./system/hardware.nix
-    ./system/fonts/fonts.nix
-    ./system/internet/kantets-wg-home.nix
-    ./system/modules/internet/accelerator.nix
+    ./system/conf/disk-config.nix
+    ./system/conf/hardware-configuration.nix
+
+    ./system/conf/boot.nix
+    ./system/conf/hardware.nix
+    ./system/conf/storage.nix
+
+    ./system/conf/fonts/fonts.nix
+
+    ./system/conf/network/no-wait-online.nix
+    ./system/conf/network/tailscale.nix
+    ./system/conf/network/kantets-wg-home.nix
+    ./system/modules/network/accelerator.nix
   ];
+
   nixpkgs.config.allowUnfree = true;
 
   nix.settings = {
@@ -20,9 +28,34 @@
       "nix-command"
       "flakes"
     ];
+
     auto-optimise-store = true;
   };
+
   time.timeZone = "Asia/Yekaterinburg";
+
+  networking = {
+    hostName = "ixliynez-pc";
+
+    networkmanager.enable = true;
+    nftables.enable = true;
+    firewall.enable = false;
+  };
+
+  users.users = {
+    ixliynez = {
+      isNormalUser = true;
+      home = "/home/ixliynez";
+      shell = pkgs.fish;
+
+      extraGroups = [
+        "wheel"
+        "libvirtd"
+        "docker"
+        "gamemode"
+      ];
+    };
+  };
 
   services = {
     openssh = {
@@ -32,12 +65,10 @@
         PasswordAuthentication = false;
       };
     };
-    lact.enable = true;
-    pipewire.enable = true;
-    gvfs.enable = true;
     internet-accelerator = {
       enable = true;
       secretFile = custom.lib.fromSecretsDir /internet-accelerator.json.age;
+      excludeFwMarks = [ "0xca6c" ];
       excludeFwMarkMasked = [
         {
           mark = "0x80000";
@@ -49,6 +80,9 @@
         }
       ];
     };
+    lact.enable = true;
+    pipewire.enable = true;
+    gvfs.enable = true;
   };
 
   programs = {
@@ -59,30 +93,19 @@
     fish = {
       enable = true;
       interactiveShellInit = ''
-                set fish_greeting
-                set fish_prompt_pwd_dir_length 0
-        	  	'';
+        set fish_greeting
+        set fish_prompt_pwd_dir_length 0
+      '';
     };
     nix-index-database.comma.enable = true;
     virt-manager.enable = true;
+    steam.enable = true;
+    gamescope.enable = true;
   };
 
-  virtualisation.libvirtd.enable = true;
-  virtualisation.libvirtd.qemu.swtpm.enable = true;
-
-  virtualisation.docker.enable = true;
-
-  users.users = {
-    ixliynez = {
-      isNormalUser = true;
-      home = "/home/ixliynez";
-      extraGroups = [
-        "wheel"
-        "libvirtd"
-        "docker"
-      ];
-      shell = pkgs.fish;
-    };
+  virtualisation = {
+    libvirtd.enable = true;
+    docker.enable = true;
   };
 
   environment = {
@@ -114,11 +137,17 @@
         micro
         btop
         fastfetch
+        jq
 
         nixd
         nixfmt
 
         distrobox
+
+        mangohud
+        heroic
+        wineWow64Packages.staging
+        winetricks
       ]
       ++ [ custom.packages.agenix ];
 
@@ -126,25 +155,6 @@
       mkparents = true;
     };
   };
-
-  networking = {
-    hostName = "ixliynez-pc";
-    networkmanager.enable = true;
-    firewall.enable = false;
-    nftables.enable = true;
-  };
-
-  services.tailscale = {
-    enable = true;
-    useRoutingFeatures = "client";
-  };
-
-  systemd.services.tailscaled.serviceConfig.Environment = [
-    "TS_DEBUG_FIREWALL_MODE=nftables"
-  ];
-
-  systemd.network.wait-online.enable = false;
-  boot.initrd.systemd.network.wait-online.enable = false;
 
   # The first version of NixOS installed on this particular computer.
   system.stateVersion = "25.11";
