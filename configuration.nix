@@ -87,7 +87,10 @@
 
   programs = {
     nix-ld.enable = true;
-    niri.enable = true;
+    niri = {
+      enable = true;
+      useNautilus = true;
+    };
     dconf.enable = true;
     tmux.enable = true;
     fish = {

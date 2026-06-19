@@ -25,6 +25,7 @@
       telegram-desktop
       mumble
       loupe
+      celluloid
       papers
       qbittorrent
       (prismlauncher.override {
@@ -165,13 +166,7 @@
   };
 
   xdg = {
-    portal = {
-      enable = true;
-      config.common.default = "gnome";
-      extraPortals = with pkgs; [
-        xdg-desktop-portal-gnome
-      ];
-    };
+    enable = true;
 
     terminal-exec = {
       enable = true;
@@ -219,9 +214,12 @@
     };
   };
 
-  dconf.settings = {
-    "org/gnome/desktop/interface" = {
-      color-scheme = "prefer-dark";
+  dconf = {
+    enable = true;
+    settings = {
+      "org/gnome/desktop/interface" = {
+        color-scheme = "prefer-dark";
+      };
     };
   };
 

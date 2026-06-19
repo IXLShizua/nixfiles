@@ -42,7 +42,7 @@ in
         ];
 
         monospace = [
-          "JetBrainsMono Nerd Font"
+          "JetBrainsMonoNL Nerd Font"
           "Noto Sans Mono CJK SC"
           "Noto Sans Mono CJK TC"
           "Noto Sans Mono CJK JP"
