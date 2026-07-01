@@ -41,6 +41,7 @@
       jetbrains.rider
       android-studio
       antigravity-fhs
+      claude-code
     ];
 
     pointerCursor = {

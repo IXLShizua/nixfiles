@@ -11,9 +11,12 @@
 
     ./system/conf/boot.nix
     ./system/conf/hardware.nix
-    ./system/conf/storage.nix
+
+    ./system/conf/audio.nix
 
     ./system/conf/fonts/fonts.nix
+
+    ./system/conf/i18n.nix
 
     ./system/conf/network/no-wait-online.nix
     ./system/conf/network/tailscale.nix
@@ -66,7 +69,7 @@
       };
     };
     internet-accelerator = {
-      enable = true;
+      enable = false;
       secretFile = custom.lib.fromSecretsDir /internet-accelerator.json.age;
       excludeFwMarks = [ "0xca6c" ];
       excludeFwMarkMasked = [
@@ -81,7 +84,6 @@
       ];
     };
     lact.enable = true;
-    pipewire.enable = true;
     gvfs.enable = true;
   };
 
@@ -151,6 +153,8 @@
         heroic
         wineWow64Packages.staging
         winetricks
+
+        roc-toolkit
       ]
       ++ [ custom.packages.agenix ];
 
