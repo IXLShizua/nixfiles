@@ -22,7 +22,7 @@
       nautilus
       xwayland-satellite
       pwvucontrol
-      telegram-desktop
+      custom.packages.telegram-desktop
       mumble
       loupe
       celluloid
@@ -31,9 +31,13 @@
       (prismlauncher.override {
         jdks = [
           zulu8
+          zulu11
           zulu17
           zulu21
           zulu25
+        ];
+        additionalLibs = [
+          libxkbcommon
         ];
       })
       termius
@@ -82,6 +86,7 @@
               bmalehorn.vscode-fish
               coolbear.systemd-unit-file
               kdl-org.kdl
+              mhutchie.git-graph
             ];
 
           userSettings = {
@@ -112,6 +117,10 @@
       enable = true;
       enableFishIntegration = true;
       nix-direnv.enable = true;
+    };
+    devenv = {
+      enable = true;
+      enableFishIntegration = true;
     };
     ghostty = {
       enable = true;

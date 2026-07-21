@@ -7,10 +7,11 @@
 
 let
   cfg = config.services.internet-accelerator;
+  settings = cfg.settings;
 
   markType = lib.types.strMatching "^(0x[0-9a-fA-F]+|[0-9]+)$";
 
-  fwMarkRuleType = lib.types.submodule {
+  fwMarkMaskedRuleType = lib.types.submodule {
     options = {
       mark = lib.mkOption {
         type = markType;
@@ -26,79 +27,138 @@ let
     };
   };
 
-  exactFwMarkRules = map (mark: ''
-    meta mark ${mark} ct mark set ${cfg.autoRedirectBypassMark} counter return
-  '') cfg.excludeFwMarks;
+  exactFwMarkRules =
+    map
+      (mark: {
+        inherit mark;
+        mask = "0xffffffff";
+      })
+      settings.fwMarksBypass.exact;
 
-  maskedFwMarkRules = map (rule: ''
-    meta mark & ${rule.mask} == ${rule.mark} ct mark set ${cfg.autoRedirectBypassMark} counter return
-  '') cfg.excludeFwMarkMasked;
+  maskedFwMarkRules = settings.fwMarksBypass.masked;
 
   allFwMarkRules = exactFwMarkRules ++ maskedFwMarkRules;
 
-  nftBypassRules = lib.concatStringsSep "\n" allFwMarkRules;
+  mkRuleArgs = rule: "fwmark ${rule.mark}/${rule.mask} lookup main";
 
-  fwmarkBypassRuleset = pkgs.writeText "internet-accelerator-fwmark-bypass.nft" ''
-    table inet internet_accelerator_bypass {
-      chain output {
-        type filter hook output priority mangle - 2; policy accept;
-        ${nftBypassRules}
-      }
+  mkPriority = i: toString (settings.fwMarksBypass.priority + i);
 
-      chain prerouting {
-        type filter hook prerouting priority dstnat - 2; policy accept;
-        ${nftBypassRules}
-      }
-    }
-  '';
+  mkDeleteIpRule = i: rule:
+    let
+      prio = mkPriority i;
+      args = mkRuleArgs rule;
+    in
+    ''
+      while ${pkgs.iproute2}/bin/ip -4 rule del priority ${prio} ${args} 2>/dev/null; do :; done
+      while ${pkgs.iproute2}/bin/ip -6 rule del priority ${prio} ${args} 2>/dev/null; do :; done
+    '';
+
+  mkAddIpRule = i: rule:
+    let
+      prio = mkPriority i;
+      args = mkRuleArgs rule;
+    in
+    ''
+      ${pkgs.iproute2}/bin/ip -4 rule add priority ${prio} ${args}
+      ${pkgs.iproute2}/bin/ip -6 rule add priority ${prio} ${args} 2>/dev/null || true
+    '';
+
+  deleteIpRules = lib.concatStringsSep "\n" (lib.imap0 mkDeleteIpRule allFwMarkRules);
+  addIpRules = lib.concatStringsSep "\n" (lib.imap0 mkAddIpRule allFwMarkRules);
+
+  hasFwMarkRules = allFwMarkRules != [ ];
 in
 {
   options.services.internet-accelerator = {
-    enable = lib.mkEnableOption "Internet Accelerator";
+    enable = lib.mkEnableOption "Internet Accelerator via Mihomo";
 
-    secretFile = lib.mkOption {
-      type = lib.types.path;
-      example = lib.literalExpression "./secrets/internet-accelerator.json.age";
-    };
+    settings = lib.mkOption {
+      type = lib.types.submodule {
+        options = {
+          mihomo = lib.mkOption {
+            type = lib.types.submodule {
+              options = {
+                secretFile = lib.mkOption {
+                  type = lib.types.path;
+                  example = lib.literalExpression "./secrets/mihomo.yaml.age";
+                  description = ''
+                    Agenix secret containing the Mihomo YAML config.
+                  '';
+                };
+              };
+            };
 
-    excludeFwMarks = lib.mkOption {
-      type = lib.types.listOf markType;
-      default = [ ];
-      example = [
-        "0x66"
-        "0x100"
-      ];
+            default = { };
+
+            description = ''
+              Mihomo service integration settings.
+            '';
+          };
+
+          fwMarksBypass = lib.mkOption {
+            type = lib.types.submodule {
+              options = {
+                priority = lib.mkOption {
+                  type = lib.types.int;
+                  default = 1000;
+                  example = 1000;
+                  description = ''
+                    Base priority for fwmark bypass policy-routing rules.
+
+                    Lower number means higher priority. If Mihomo creates
+                    routing rules with higher priority, lower this value.
+                  '';
+                };
+
+                exact = lib.mkOption {
+                  type = lib.types.listOf markType;
+                  default = [ ];
+                  example = [
+                    "0x51820"
+                    "0xca6c"
+                  ];
+                  description = ''
+                    Exact fwmark values that must bypass Mihomo TUN routing.
+                  '';
+                };
+
+                masked = lib.mkOption {
+                  type = lib.types.listOf fwMarkMaskedRuleType;
+                  default = [ ];
+                  example = [
+                    {
+                      mark = "0x80000";
+                      mask = "0xff0000";
+                    }
+                    {
+                      mark = "0x400";
+                      mask = "0xff00";
+                    }
+                  ];
+                  description = ''
+                    Masked fwmark match rules.
+
+                    Each rule is translated to:
+
+                      ip rule add fwmark MARK/MASK lookup main
+                  '';
+                };
+              };
+            };
+
+            default = { };
+
+            description = ''
+              Policy-routing bypass for marked packets.
+            '';
+          };
+        };
+      };
+
+      default = { };
+
       description = ''
-        Exact fwmark values that must bypass sing-box auto_redirect/TUN proxying.
-      '';
-    };
-
-    excludeFwMarkMasked = lib.mkOption {
-      type = lib.types.listOf fwMarkRuleType;
-      default = [ ];
-      example = [
-        {
-          mark = "0x80000";
-          mask = "0xff0000";
-        }
-        {
-          mark = "0x400";
-          mask = "0xff00";
-        }
-      ];
-      description = ''
-        fwmark match rules with mask. For matched packets, this module sets
-        conntrack mark to sing-box auto_redirect_output_mark before sing-box
-        nft hooks run.
-      '';
-    };
-
-    autoRedirectBypassMark = lib.mkOption {
-      type = markType;
-      default = "0x2024";
-      example = "0x2024";
-      description = ''
-        Must match sing-box auto_redirect_output_mark from the JSON config.
+        Internet Accelerator service settings.
       '';
     };
   };
@@ -106,56 +166,51 @@ in
   config = lib.mkIf cfg.enable {
     assertions = [
       {
-        assertion = config.networking.nftables.enable;
+        assertion = config.networking.nftables.enable || config.networking.networkmanager.enable;
         message = ''
-          services.internet-accelerator requires networking.nftables.enable = true.
-
-          This module installs nftables rules for fwmark bypassing and expects
-          nftables to be available when the accelerator is enabled.
-        '';
-      }
-
-      {
-        assertion = config.networking.networkmanager.enable;
-        message = ''
-          services.internet-accelerator currently requires networking.networkmanager.enable = true,
-          because this module configures DNS through networking.networkmanager.dns = "none".
+          services.internet-accelerator.enable = true requires networking.nftables.enable and networking.networkmanager.enable = true.
         '';
       }
     ];
 
-    age.secrets."internet-accelerator.json" = {
-      file = cfg.secretFile;
-      owner = "sing-box";
-    };
+    age.secrets."internet-accelerator.yaml".file = settings.mihomo.secretFile;
 
-    services.sing-box.enable = true;
+    services.mihomo = {
+      enable = true;
+
+      tunMode = true;
+      processesInfo = true;
+      webui = pkgs.metacubexd;
+
+      configFile = config.age.secrets."internet-accelerator.yaml".path;
+    };
 
     networking = {
       nftables.enable = lib.mkDefault true;
-      networkmanager.enable = lib.mkDefault true;
 
-      networkmanager.dns = "none";
+      networkmanager = {
+        enable = lib.mkDefault true;
+        dns = "none";
+      };
+
       nameservers = [
-        "127.0.0.1"
+        "1.1.1.1"
+        "1.0.0.1"
       ];
     };
 
-    systemd.services.sing-box = {
-      serviceConfig.ExecStart = lib.mkForce [
-        ""
-        "${pkgs.sing-box}/bin/sing-box run -c ${config.age.secrets."internet-accelerator.json".path}"
-      ];
-    }
-    // lib.optionalAttrs (allFwMarkRules != [ ]) {
+    systemd.services.mihomo = lib.optionalAttrs hasFwMarkRules {
       postStart = lib.mkAfter ''
         set -eu
-        ${pkgs.nftables}/bin/nft delete table inet internet_accelerator_bypass 2>/dev/null || true
-        ${pkgs.nftables}/bin/nft -f ${fwmarkBypassRuleset}
+
+        ${deleteIpRules}
+        ${addIpRules}
       '';
 
       postStop = lib.mkAfter ''
-        ${pkgs.nftables}/bin/nft delete table inet internet_accelerator_bypass 2>/dev/null || true
+        set -eu
+
+        ${deleteIpRules}
       '';
     };
   };

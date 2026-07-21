@@ -12,5 +12,5 @@ let
 in
 {
   "kantets-wg-home.conf.age" = secretDefaultConfig;
-  "internet-accelerator.json.age" = secretDefaultConfig;
+  "internet-accelerator.yaml.age" = secretDefaultConfig;
 }

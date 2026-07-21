@@ -2,6 +2,7 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     nixpkgs-easyeffects.url = "github:nixos/nixpkgs/d4bbd6814a5f9988d1cd43abca69a43e124fe81b";
+    nixpkgs-telegram.url = "github:nixos/nixpkgs/b3c092d3c36d91e2f61f3dfb39a159f180a56659";
 
     disko.url = "github:nix-community/disko/latest";
     disko.inputs.nixpkgs.follows = "nixpkgs";
@@ -23,6 +24,7 @@
     {
       nixpkgs,
       nixpkgs-easyeffects,
+      nixpkgs-telegram,
       disko,
       nix-index-database,
       agenix,
@@ -35,11 +37,22 @@
       root = ./.;
       secretsDir = root + "/secrets";
 
+      pkgsWithVscodeExtensions = import nixpkgs {
+        inherit system;
+        config = {
+          allowUnfree = true;
+        };
+        overlays = [
+          nix-vscode-extensions.overlays.default
+        ];
+      };
+
       custom = {
         packages = {
           easyeffects = (import nixpkgs-easyeffects { inherit system; }).easyeffects;
+          telegram-desktop = (import nixpkgs-telegram { inherit system; }).telegram-desktop;
           agenix = agenix.packages.${system}.default;
-          community-vscode-extensions = nix-vscode-extensions.extensions.${system}.vscode-marketplace;
+          community-vscode-extensions = pkgsWithVscodeExtensions.vscode-marketplace;
         };
 
         lib = {

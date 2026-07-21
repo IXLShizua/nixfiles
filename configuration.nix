@@ -69,19 +69,28 @@
       };
     };
     internet-accelerator = {
-      enable = false;
-      secretFile = custom.lib.fromSecretsDir /internet-accelerator.json.age;
-      excludeFwMarks = [ "0xca6c" ];
-      excludeFwMarkMasked = [
-        {
-          mark = "0x80000";
-          mask = "0xff0000";
-        }
-        {
-          mark = "0x400";
-          mask = "0xff00";
-        }
-      ];
+      enable = true;
+
+      settings = {
+        mihomo = {
+          secretFile = custom.lib.fromSecretsDir /internet-accelerator.yaml.age;
+        };
+
+        fwMarksBypass = {
+          priority = 1000;
+          exact = [ "0xca6c" ];
+          masked = [
+            {
+              mark = "0x80000";
+              mask = "0xff0000";
+            }
+            {
+              mark = "0x400";
+              mask = "0xff00";
+            }
+          ];
+        };
+      };
     };
     lact.enable = true;
     gvfs.enable = true;
