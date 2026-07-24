@@ -47,10 +47,19 @@
         ];
       };
 
+      pkgsWithOldTelegram = import nixpkgs-telegram {
+        inherit system;
+        config = {
+          allowUnfree = true;
+        };
+      };
+
       custom = {
         packages = {
           easyeffects = (import nixpkgs-easyeffects { inherit system; }).easyeffects;
-          telegram-desktop = (import nixpkgs-telegram { inherit system; }).telegram-desktop;
+          telegram-desktop =
+            pkgsWithOldTelegram.callPackage ./home/ixliynez/packages/telegram-with-webview.nix
+              { };
           agenix = agenix.packages.${system}.default;
           community-vscode-extensions = pkgsWithVscodeExtensions.vscode-marketplace;
         };

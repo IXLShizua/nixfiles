@@ -49,6 +49,7 @@
     ];
 
     pointerCursor = {
+      enable = true;
       gtk.enable = true;
       x11.enable = true;
       name = "Bibata-Modern-Classic";
@@ -129,7 +130,9 @@
       settings = {
         theme = "Adwaita Dark";
         font-family = "JetBrainsMono Nerd Font";
+        
         initial-window = true;
+        gtk-single-instance = true;
         quit-after-last-window-closed = false;
       };
     };
