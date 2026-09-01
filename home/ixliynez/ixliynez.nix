@@ -44,8 +44,10 @@
       jetbrains.idea
       jetbrains.rider
       android-studio
-      antigravity-fhs
+      antigravity-ide-fhs
+      antigravity-cli
       claude-code
+      codex
     ];
 
     pointerCursor = {
@@ -84,16 +86,36 @@
             [
               mkhl.direnv
               jnoortheen.nix-ide
+              tombi-toml.tombi
               bmalehorn.vscode-fish
               coolbear.systemd-unit-file
               kdl-org.kdl
               mhutchie.git-graph
+              rust-lang.rust-analyzer
             ];
 
           userSettings = {
             "editor.fontSize" = 14;
+            "editor.lineHeight" = 1.2;
             "editor.fontFamily" = "JetBrainsMono Nerd Font";
             "window.zoomLevel" = 1;
+
+            "rust-analyzer.check.command" = "clippy";
+
+            "[rust]" = {
+              "editor.defaultFormatter" = "rust-lang.rust-analyzer";
+              "editor.formatOnSave" = true;
+            };
+
+            "[toml]" = {
+              "editor.defaultFormatter" = "tombi-toml.tombi";
+              "editor.formatOnSave" = true;
+            };
+
+            "[nix]" = {
+              "editor.defaultFormatter" = "jnoortheen.nix-ide";
+              "editor.formatOnSave" = true;
+            };
 
             "nix.enableLanguageServer" = true;
             "nix.serverPath" = "nixd";
@@ -112,12 +134,25 @@
       enable = true;
       settings = {
         safe.directory = [ "/etc/nixos" ];
+
+        diff.tool = "vscode";
+        difftool.vscode.cmd = "code --wait --diff \"$LOCAL\" \"$REMOTE\"";
+
+        format.pretty = "format:%C(auto)%h%C(reset) %s %C(auto)%d%C(reset) %C(dim white)· %ad · %an%C(reset)";
+        log.date = "short";
+
+        init.defaultBranch = "main";
+        push.autoSetupRemote = true;
       };
     };
     direnv = {
       enable = true;
       enableFishIntegration = true;
       nix-direnv.enable = true;
+
+      config = {
+        warn_timeout = "0s";
+      };
     };
     devenv = {
       enable = true;
@@ -130,7 +165,7 @@
       settings = {
         theme = "Adwaita Dark";
         font-family = "JetBrainsMono Nerd Font";
-        
+
         initial-window = true;
         gtk-single-instance = true;
         quit-after-last-window-closed = false;

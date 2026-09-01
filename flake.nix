@@ -37,6 +37,13 @@
       root = ./.;
       secretsDir = root + "/secrets";
 
+      mkPkgs =
+        pkgs:
+        import pkgs {
+          inherit system;
+          config.allowUnfree = true;
+        };
+
       pkgsWithVscodeExtensions = import nixpkgs {
         inherit system;
         config = {
@@ -47,18 +54,11 @@
         ];
       };
 
-      pkgsWithOldTelegram = import nixpkgs-telegram {
-        inherit system;
-        config = {
-          allowUnfree = true;
-        };
-      };
-
       custom = {
         packages = {
-          easyeffects = (import nixpkgs-easyeffects { inherit system; }).easyeffects;
+          easyeffects = (mkPkgs nixpkgs-easyeffects).easyeffects;
           telegram-desktop =
-            pkgsWithOldTelegram.callPackage ./home/ixliynez/packages/telegram-with-webview.nix
+            (mkPkgs nixpkgs-telegram).callPackage ./home/ixliynez/packages/telegram-with-webview.nix
               { };
           agenix = agenix.packages.${system}.default;
           community-vscode-extensions = pkgsWithVscodeExtensions.vscode-marketplace;

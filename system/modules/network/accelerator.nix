@@ -27,13 +27,10 @@ let
     };
   };
 
-  exactFwMarkRules =
-    map
-      (mark: {
-        inherit mark;
-        mask = "0xffffffff";
-      })
-      settings.fwMarksBypass.exact;
+  exactFwMarkRules = map (mark: {
+    inherit mark;
+    mask = "0xffffffff";
+  }) settings.fwMarksBypass.exact;
 
   maskedFwMarkRules = settings.fwMarksBypass.masked;
 
@@ -43,7 +40,8 @@ let
 
   mkPriority = i: toString (settings.fwMarksBypass.priority + i);
 
-  mkDeleteIpRule = i: rule:
+  mkDeleteIpRule =
+    i: rule:
     let
       prio = mkPriority i;
       args = mkRuleArgs rule;
@@ -53,7 +51,8 @@ let
       while ${pkgs.iproute2}/bin/ip -6 rule del priority ${prio} ${args} 2>/dev/null; do :; done
     '';
 
-  mkAddIpRule = i: rule:
+  mkAddIpRule =
+    i: rule:
     let
       prio = mkPriority i;
       args = mkRuleArgs rule;
@@ -83,6 +82,15 @@ in
                   example = lib.literalExpression "./secrets/mihomo.yaml.age";
                   description = ''
                     Agenix secret containing the Mihomo YAML config.
+                  '';
+                };
+
+                package = lib.mkOption {
+                  type = lib.types.package;
+                  default = pkgs.mihomo;
+                  defaultText = lib.literalExpression "pkgs.mihomo";
+                  description = ''
+                    Mihomo package to use.
                   '';
                 };
               };
@@ -177,6 +185,7 @@ in
 
     services.mihomo = {
       enable = true;
+      package = settings.mihomo.package;
 
       tunMode = true;
       processesInfo = true;
@@ -187,16 +196,7 @@ in
 
     networking = {
       nftables.enable = lib.mkDefault true;
-
-      networkmanager = {
-        enable = lib.mkDefault true;
-        dns = "none";
-      };
-
-      nameservers = [
-        "1.1.1.1"
-        "1.0.0.1"
-      ];
+      networkmanager.enable = lib.mkDefault true;
     };
 
     systemd.services.mihomo = lib.optionalAttrs hasFwMarkRules {

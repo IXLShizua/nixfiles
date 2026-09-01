@@ -7,7 +7,7 @@
 
 let
   cfg = config.services.mediamtx;
-  format = pkgs.formats.yaml { };
+  format = pkgs.formats.yaml_1_2 { };
   confFile = format.generate "mediamtx.yaml" cfg.settings;
 in
 {

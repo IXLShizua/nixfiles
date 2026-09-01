@@ -12,6 +12,10 @@
     ./system/conf/boot.nix
     ./system/conf/hardware.nix
 
+    ./system/conf/networking.nix
+
+    ./system/conf/virtualisation.nix
+
     ./system/conf/audio.nix
 
     ./system/conf/fonts/fonts.nix
@@ -25,6 +29,7 @@
   ];
 
   nixpkgs.config.allowUnfree = true;
+  nixpkgs.config.rocmSupport = true;
 
   nix.settings = {
     experimental-features = [
@@ -36,14 +41,6 @@
   };
 
   time.timeZone = "Asia/Yekaterinburg";
-
-  networking = {
-    hostName = "ixliynez-pc";
-
-    networkmanager.enable = true;
-    nftables.enable = true;
-    firewall.enable = false;
-  };
 
   users.users = {
     ixliynez = {
@@ -115,11 +112,6 @@
     virt-manager.enable = true;
     steam.enable = true;
     gamescope.enable = true;
-  };
-
-  virtualisation = {
-    libvirtd.enable = true;
-    docker.enable = true;
   };
 
   environment = {
