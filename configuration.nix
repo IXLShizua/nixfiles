@@ -12,8 +12,6 @@
     ./system/conf/boot.nix
     ./system/conf/hardware.nix
 
-    ./system/conf/networking.nix
-
     ./system/conf/virtualisation.nix
 
     ./system/conf/audio.nix
@@ -22,14 +20,39 @@
 
     ./system/conf/i18n.nix
 
+    ./system/conf/network/networking.nix
+    ./system/conf/network/internet-accelerator.nix
     ./system/conf/network/no-wait-online.nix
     ./system/conf/network/tailscale.nix
     ./system/conf/network/kantets-wg-home.nix
+
     ./system/modules/network/accelerator.nix
   ];
 
   nixpkgs.config.allowUnfree = true;
   nixpkgs.config.rocmSupport = true;
+
+  nixpkgs.overlays = [
+    (final: prev: {
+      zapret2 = prev.zapret2.overrideAttrs (old: rec {
+        version = "1.0.5";
+
+        src = prev.fetchFromGitHub {
+          owner = "bol-van";
+          repo = "zapret2";
+          tag = "v${version}";
+          hash = "sha256-hoDUASf2xcpqNaoEGp4HduVbBIVvIo3CuwUJ9tgZ19c=";
+          leaveDotGit = true;
+
+          postFetch = ''
+            cd "$out"
+            git rev-parse --short=12 HEAD > COMMIT
+            find "$out" -name .git -print0 | xargs -0 rm -rf
+          '';
+        };
+      });
+    })
+  ];
 
   nix.settings = {
     experimental-features = [
@@ -63,30 +86,6 @@
       settings = {
         PermitRootLogin = "no";
         PasswordAuthentication = false;
-      };
-    };
-    internet-accelerator = {
-      enable = true;
-
-      settings = {
-        mihomo = {
-          secretFile = custom.lib.fromSecretsDir /internet-accelerator.yaml.age;
-        };
-
-        fwMarksBypass = {
-          priority = 1000;
-          exact = [ "0xca6c" ];
-          masked = [
-            {
-              mark = "0x80000";
-              mask = "0xff0000";
-            }
-            {
-              mark = "0x400";
-              mask = "0xff00";
-            }
-          ];
-        };
       };
     };
     lact.enable = true;

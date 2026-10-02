@@ -18,6 +18,12 @@
 
     nix-vscode-extensions.url = "github:nix-community/nix-vscode-extensions";
     nix-vscode-extensions.inputs.nixpkgs.follows = "nixpkgs";
+
+    codex-mcp-serena.url = "github:oraios/serena";
+    codex-mcp-serena.inputs.nixpkgs.follows = "nixpkgs";
+
+    codex-mcp-codebase-memory-mcp.url = "github:DeusData/codebase-memory-mcp";
+    codex-mcp-codebase-memory-mcp.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs =
@@ -30,6 +36,8 @@
       agenix,
       home-manager,
       nix-vscode-extensions,
+      codex-mcp-serena,
+      codex-mcp-codebase-memory-mcp,
       ...
     }:
     let
@@ -62,6 +70,9 @@
               { };
           agenix = agenix.packages.${system}.default;
           community-vscode-extensions = pkgsWithVscodeExtensions.vscode-marketplace;
+
+          codex-mcp-serena = codex-mcp-serena.packages.${system}.default;
+          codex-mcp-codebase-memory-mcp = codex-mcp-codebase-memory-mcp.packages.${system}.default;
         };
 
         lib = {

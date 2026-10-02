@@ -42,12 +42,13 @@
       })
       termius
       jetbrains.idea
-      jetbrains.rider
       android-studio
       antigravity-ide-fhs
       antigravity-cli
       claude-code
       codex
+      custom.packages.codex-mcp-serena
+      custom.packages.codex-mcp-codebase-memory-mcp
     ];
 
     pointerCursor = {
@@ -59,10 +60,6 @@
       size = 20;
     };
 
-    activation.vicinae-refresh-apps = lib.mkForce ''
-      ${pkgs.vicinae}/bin/vicinae deeplink vicinae://launch/core/refresh-apps || true
-    '';
-
     stateVersion = "25.11";
   };
 
@@ -72,6 +69,7 @@
       # Remove explicit configPath after update home.stateVersion to >= 26.05
       configPath = "${config.xdg.configHome}/mozilla/firefox";
     };
+    chromium.enable = true;
     vscode = {
       enable = true;
       package = pkgs.vscode.fhs;
