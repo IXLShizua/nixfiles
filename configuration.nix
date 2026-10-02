@@ -32,28 +32,6 @@
   nixpkgs.config.allowUnfree = true;
   nixpkgs.config.rocmSupport = true;
 
-  nixpkgs.overlays = [
-    (final: prev: {
-      zapret2 = prev.zapret2.overrideAttrs (old: rec {
-        version = "1.0.5";
-
-        src = prev.fetchFromGitHub {
-          owner = "bol-van";
-          repo = "zapret2";
-          tag = "v${version}";
-          hash = "sha256-hoDUASf2xcpqNaoEGp4HduVbBIVvIo3CuwUJ9tgZ19c=";
-          leaveDotGit = true;
-
-          postFetch = ''
-            cd "$out"
-            git rev-parse --short=12 HEAD > COMMIT
-            find "$out" -name .git -print0 | xargs -0 rm -rf
-          '';
-        };
-      });
-    })
-  ];
-
   nix.settings = {
     experimental-features = [
       "nix-command"
