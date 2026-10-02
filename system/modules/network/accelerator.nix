@@ -63,6 +63,7 @@ let
     '';
 
   deleteIpRules = lib.concatStringsSep "\n" (lib.imap0 mkDeleteIpRule allFwMarkRules);
+
   addIpRules = lib.concatStringsSep "\n" (lib.imap0 mkAddIpRule allFwMarkRules);
 
   hasFwMarkRules = allFwMarkRules != [ ];
@@ -91,6 +92,18 @@ in
                   defaultText = lib.literalExpression "pkgs.mihomo";
                   description = ''
                     Mihomo package to use.
+                  '';
+                };
+
+                tunDevice = lib.mkOption {
+                  type = lib.types.str;
+                  default = "mihomo0";
+                  example = "mihomo0";
+                  description = ''
+                    Name of the TUN interface created by Mihomo.
+
+                    This must match `tun.device` in the Mihomo YAML
+                    configuration.
                   '';
                 };
               };
@@ -174,14 +187,42 @@ in
   config = lib.mkIf cfg.enable {
     assertions = [
       {
-        assertion = config.networking.nftables.enable || config.networking.networkmanager.enable;
+        assertion = config.networking.nftables.enable && config.networking.networkmanager.enable;
+
         message = ''
-          services.internet-accelerator.enable = true requires networking.nftables.enable and networking.networkmanager.enable = true.
+          services.internet-accelerator.enable = true requires
+          networking.nftables.enable = true and
+          networking.networkmanager.enable = true.
         '';
       }
     ];
 
     age.secrets."internet-accelerator.yaml".file = settings.mihomo.secretFile;
+
+    services.resolved.enable = lib.mkDefault true;
+
+    security.polkit = {
+      enable = true;
+
+      extraConfig = ''
+        polkit.addRule(function(action, subject) {
+          var mihomoResolvedActions = [
+            "org.freedesktop.resolve1.revert",
+            "org.freedesktop.resolve1.set-domains",
+            "org.freedesktop.resolve1.set-default-route",
+            "org.freedesktop.resolve1.set-dns-servers"
+          ];
+
+          if (
+            mihomoResolvedActions.indexOf(action.id) !== -1 &&
+            subject.system_unit == "mihomo.service" &&
+            subject.no_new_privileges
+          ) {
+            return polkit.Result.YES;
+          }
+        });
+      '';
+    };
 
     services.mihomo = {
       enable = true;
@@ -196,10 +237,47 @@ in
 
     networking = {
       nftables.enable = lib.mkDefault true;
-      networkmanager.enable = lib.mkDefault true;
+
+      networkmanager = {
+        enable = lib.mkDefault true;
+
+        dns = lib.mkDefault "systemd-resolved";
+
+        unmanaged = lib.mkAfter [
+          "interface-name:${settings.mihomo.tunDevice}"
+        ];
+      };
     };
 
-    systemd.services.mihomo = lib.optionalAttrs hasFwMarkRules {
+    systemd.services.mihomo = {
+      path = [
+        pkgs.systemd
+      ];
+
+      /*
+        services.mihomo with tunMode=true already allows:
+
+          AF_INET AF_INET6 AF_NETLINK
+
+        Add AF_UNIX without replacing the original definition.
+        NixOS' systemd unitOption merge logic concatenates definitions
+        when at least one of them is a list.
+      */
+      serviceConfig.RestrictAddressFamilies = lib.mkAfter [
+        "AF_UNIX"
+      ];
+
+      wants = [
+        "systemd-resolved.service"
+        "polkit.service"
+      ];
+
+      after = [
+        "systemd-resolved.service"
+        "polkit.service"
+      ];
+    }
+    // lib.optionalAttrs hasFwMarkRules {
       postStart = lib.mkAfter ''
         set -eu
 

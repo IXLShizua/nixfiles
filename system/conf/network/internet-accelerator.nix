@@ -13,6 +13,7 @@ in
       settings = {
         mihomo = {
           secretFile = custom.lib.fromSecretsDir /internet-accelerator.yaml.age;
+          tunDevice = "mihomo0";
         };
 
         fwMarksBypass = {
