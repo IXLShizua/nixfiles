@@ -24,6 +24,9 @@
 
     codex-mcp-codebase-memory-mcp.url = "github:DeusData/codebase-memory-mcp";
     codex-mcp-codebase-memory-mcp.inputs.nixpkgs.follows = "nixpkgs";
+
+    fern-topbar.url = "github:IXLShizua/fern-topbar";
+    fern-topbar.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs =
@@ -38,6 +41,7 @@
       nix-vscode-extensions,
       codex-mcp-serena,
       codex-mcp-codebase-memory-mcp,
+      fern-topbar,
       ...
     }:
     let
@@ -68,6 +72,7 @@
           telegram-desktop =
             (mkPkgs nixpkgs-telegram).callPackage ./home/ixliynez/packages/telegram-with-webview.nix
               { };
+          fern-topbar = fern-topbar.packages.${system}.default;
           agenix = agenix.packages.${system}.default;
           community-vscode-extensions = pkgsWithVscodeExtensions.vscode-marketplace;
 

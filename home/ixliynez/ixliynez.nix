@@ -49,6 +49,7 @@
       codex
       custom.packages.codex-mcp-serena
       custom.packages.codex-mcp-codebase-memory-mcp
+      custom.packages.fern-topbar
     ];
 
     pointerCursor = {
