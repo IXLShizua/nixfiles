@@ -25,8 +25,8 @@
     codex-mcp-codebase-memory-mcp.url = "github:DeusData/codebase-memory-mcp";
     codex-mcp-codebase-memory-mcp.inputs.nixpkgs.follows = "nixpkgs";
 
-    fern-topbar.url = "github:IXLShizua/fern-topbar";
-    fern-topbar.inputs.nixpkgs.follows = "nixpkgs";
+    lanzaboote.url = "github:nix-community/lanzaboote";
+    lanzaboote.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs =
@@ -41,7 +41,7 @@
       nix-vscode-extensions,
       codex-mcp-serena,
       codex-mcp-codebase-memory-mcp,
-      fern-topbar,
+      lanzaboote,
       ...
     }:
     let
@@ -70,11 +70,15 @@
         packages = {
           easyeffects = (mkPkgs nixpkgs-easyeffects).easyeffects;
           telegram-desktop =
-            (mkPkgs nixpkgs-telegram).callPackage ./home/ixliynez/packages/telegram-with-webview.nix
+            (mkPkgs nixpkgs).callPackage ./home/ixliynez/packages/telegram-with-webview.nix
               { };
-          fern-topbar = fern-topbar.packages.${system}.default;
           agenix = agenix.packages.${system}.default;
           community-vscode-extensions = pkgsWithVscodeExtensions.vscode-marketplace;
+
+          artcraft = {
+            wordcraft = (mkPkgs nixpkgs).callPackage ./home/ixliynez/packages/artcraft/wordcraft.nix { };
+            deckcraft = (mkPkgs nixpkgs).callPackage ./home/ixliynez/packages/artcraft/deckcraft.nix { };
+          };
 
           codex-mcp-serena = codex-mcp-serena.packages.${system}.default;
           codex-mcp-codebase-memory-mcp = codex-mcp-codebase-memory-mcp.packages.${system}.default;
@@ -98,6 +102,7 @@
             disko.nixosModules.disko
             nix-index-database.nixosModules.default
             agenix.nixosModules.default
+            lanzaboote.nixosModules.lanzaboote
 
             home-manager.nixosModules.home-manager
             {

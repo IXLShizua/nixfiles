@@ -49,7 +49,9 @@
       codex
       custom.packages.codex-mcp-serena
       custom.packages.codex-mcp-codebase-memory-mcp
-      custom.packages.fern-topbar
+
+      custom.packages.artcraft.wordcraft
+      custom.packages.artcraft.deckcraft
     ];
 
     pointerCursor = {
@@ -65,6 +67,7 @@
   };
 
   programs = {
+    nh.enable = true;
     firefox = {
       enable = true;
       # Remove explicit configPath after update home.stateVersion to >= 26.05
@@ -91,6 +94,12 @@
               kdl-org.kdl
               mhutchie.git-graph
               rust-lang.rust-analyzer
+
+              ms-python.python
+              ms-python.debugpy
+              ms-python.vscode-pylance
+              ms-python.vscode-python-envs
+              charliermarsh.ruff
             ];
 
           userSettings = {
@@ -115,6 +124,21 @@
               "editor.defaultFormatter" = "jnoortheen.nix-ide";
               "editor.formatOnSave" = true;
             };
+
+            "[python]" = {
+              "editor.defaultFormatter" = "charliermarsh.ruff";
+              "editor.formatOnSave" = true;
+
+              "editor.codeActionsOnSave" = {
+                "source.fixAll.ruff" = "explicit";
+                "source.organizeImports.ruff" = "explicit";
+              };
+            };
+
+            "python.analysis.typeCheckingMode" = "basic";
+
+            "python-envs.alwaysUseUv" = true;
+            "python-envs.terminal.autoActivationType" = "off";
 
             "nix.enableLanguageServer" = true;
             "nix.serverPath" = "nixd";
@@ -229,6 +253,9 @@
           fileManager = [ "org.gnome.Nautilus.desktop" ];
           imageViewer = [ "org.gnome.Loupe.desktop" ];
           pdfViewer = [ "org.gnome.Papers.desktop" ];
+
+          wordcraft = [ "ai.storyteller.wordcraft.desktop" ];
+          deckcraft = [ "ai.storyteller.deckcraft.desktop" ];
         in
         {
           "text/plain" = vscode;
@@ -257,6 +284,15 @@
           "application/postscript" = pdfViewer;
           "application/oxps" = pdfViewer;
           "application/vnd.ms-xpsdocument" = pdfViewer;
+
+          "application/msword" = wordcraft;
+          "application/vnd.openxmlformats-officedocument.wordprocessingml.document" = wordcraft;
+          "application/vnd.ms-word.document.macroenabled.12" = wordcraft;
+
+          "application/vnd.ms-powerpoint" = deckcraft;
+          "application/vnd.openxmlformats-officedocument.presentationml.presentation" = deckcraft;
+          "application/vnd.ms-powerpoint.presentation.macroenabled.12" = deckcraft;
+
         };
     };
   };

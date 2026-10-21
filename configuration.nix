@@ -131,7 +131,7 @@
         wineWow64Packages.staging
         winetricks
 
-        roc-toolkit
+        sbctl
       ]
       ++ [ custom.packages.agenix ];
 
