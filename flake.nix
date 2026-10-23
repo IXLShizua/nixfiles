@@ -27,6 +27,11 @@
 
     lanzaboote.url = "github:nix-community/lanzaboote";
     lanzaboote.inputs.nixpkgs.follows = "nixpkgs";
+
+    proton-cachyos = {
+      url = "github:Daaboulex/proton-cachyos-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
@@ -42,6 +47,7 @@
       codex-mcp-serena,
       codex-mcp-codebase-memory-mcp,
       lanzaboote,
+      proton-cachyos,
       ...
     }:
     let
@@ -79,6 +85,8 @@
             wordcraft = (mkPkgs nixpkgs).callPackage ./home/ixliynez/packages/artcraft/wordcraft.nix { };
             deckcraft = (mkPkgs nixpkgs).callPackage ./home/ixliynez/packages/artcraft/deckcraft.nix { };
           };
+
+          proton-cachyos = proton-cachyos.packages.${system}.default;
 
           codex-mcp-serena = codex-mcp-serena.packages.${system}.default;
           codex-mcp-codebase-memory-mcp = codex-mcp-codebase-memory-mcp.packages.${system}.default;

@@ -86,7 +86,12 @@
     };
     nix-index-database.comma.enable = true;
     virt-manager.enable = true;
-    steam.enable = true;
+    steam = {
+      enable = true;
+      extraCompatPackages = [
+        custom.packages.proton-cachyos
+      ];
+    };
     gamescope.enable = true;
   };
 
